@@ -1,5 +1,5 @@
 import React from 'react';
-import { CalendarEvent } from '../mcp/types';
+import type { CalendarEvent } from '../mcp/types';
 import MeetingCard from './MeetingCard';
 
 interface MeetingListProps {

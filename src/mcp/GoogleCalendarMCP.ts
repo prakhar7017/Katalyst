@@ -1,4 +1,4 @@
-import { CalendarEvent, CalendarListResponse, MCPCalendarClient } from './types';
+import type { CalendarEvent, CalendarListResponse, MCPCalendarClient } from './types';
 
 export class GoogleCalendarMCP implements MCPCalendarClient {
   private accessToken: string;

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { GoogleCalendarMCP } from '../mcp/GoogleCalendarMCP';
-import { CalendarEvent } from '../mcp/types';
+import type { CalendarEvent } from '../mcp/types';
 
 interface UseCalendarMCPResult {
   upcomingEvents: CalendarEvent[];
