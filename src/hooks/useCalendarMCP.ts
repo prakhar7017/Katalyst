@@ -19,7 +19,6 @@ export function useCalendarMCP(maxResults = 5): UseCalendarMCPResult {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Create MCP client when authenticated
   const getMCPClient = () => {
     if (!isAuthenticated || !user?.accessToken) {
       throw new Error('User not authenticated');
@@ -27,7 +26,6 @@ export function useCalendarMCP(maxResults = 5): UseCalendarMCPResult {
     return new GoogleCalendarMCP(user.accessToken);
   };
 
-  // Fetch events from Google Calendar
   const fetchEvents = async () => {
     if (!isAuthenticated || !user?.accessToken) {
       return;
@@ -39,7 +37,6 @@ export function useCalendarMCP(maxResults = 5): UseCalendarMCPResult {
     try {
       const mcpClient = getMCPClient();
       
-      // Fetch upcoming and past events in parallel
       const [upcoming, past] = await Promise.all([
         mcpClient.getUpcomingEvents(maxResults),
         mcpClient.getPastEvents(maxResults)
@@ -55,8 +52,7 @@ export function useCalendarMCP(maxResults = 5): UseCalendarMCPResult {
     }
   };
 
-  // Get details for a specific event
-  const getEventDetails = async (eventId: string): Promise<CalendarEvent | null> => {
+    const getEventDetails = async (eventId: string): Promise<CalendarEvent | null> => {
     if (!isAuthenticated || !user?.accessToken) {
       return null;
     }
@@ -71,12 +67,10 @@ export function useCalendarMCP(maxResults = 5): UseCalendarMCPResult {
     }
   };
 
-  // Fetch events on initial load and when authentication changes
   useEffect(() => {
     if (isAuthenticated && user?.accessToken) {
       fetchEvents();
     } else {
-      // Reset state when not authenticated
       setUpcomingEvents([]);
       setPastEvents([]);
     }

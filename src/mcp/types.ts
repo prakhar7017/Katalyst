@@ -30,7 +30,7 @@ export interface CalendarEvent {
   attendees?: Array<{
     email: string;
     displayName?: string;
-    responseStatus?: 'needsAction' | 'declined' | 'tentative' | 'accepted';
+    responseStatus?: "needsAction" | "declined" | "tentative" | "accepted";
   }>;
   organizer?: {
     email: string;

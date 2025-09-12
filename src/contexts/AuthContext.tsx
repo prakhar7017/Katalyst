@@ -22,7 +22,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   });
 
   useEffect(() => {
-    // Check if user is already authenticated (e.g., from localStorage)
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       try {

@@ -8,7 +8,7 @@ interface MeetingCardProps {
 }
 
 const MeetingCard: React.FC<MeetingCardProps> = ({ meeting, isPast = false, onClick }) => {
-  // Format date and time
+
   const formatDateTime = (dateTimeStr: string) => {
     const date = new Date(dateTimeStr);
     return new Intl.DateTimeFormat('en-US', {
@@ -21,7 +21,6 @@ const MeetingCard: React.FC<MeetingCardProps> = ({ meeting, isPast = false, onCl
     }).format(date);
   };
 
-  // Calculate duration in minutes
   const calculateDuration = () => {
     const start = new Date(meeting.start.dateTime);
     const end = new Date(meeting.end.dateTime);
@@ -37,10 +36,8 @@ const MeetingCard: React.FC<MeetingCardProps> = ({ meeting, isPast = false, onCl
     }
   };
 
-  // Get attendee count
   const attendeeCount = meeting.attendees?.length || 0;
 
-  // Handle click
   const handleClick = () => {
     if (onClick) {
       onClick(meeting);
