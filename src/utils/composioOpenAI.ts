@@ -31,12 +31,36 @@ export async function fetchCalendarEventsWithAI(
       : 'default');
 
     console.log(
-      `Setting up Composio with OpenAI for connection ID: ${connectionId}`
+      `Setting up Composio with OpenAI for connection ID: ${connectionId} and user ID: ${userId}`
     );
-
+    
+    // Log the user ID we're using for this request
+    console.log(`Using user ID for calendar events: ${userId}`);
+    
+    // No need to reformat the user ID - we should use exactly what was provided
+    // from the authentication flow to maintain consistency
+    
+    try {
+      // First, check if the connected account exists
+      const connectedAccounts = await composio.connectedAccounts.list({
+        userIds: [userId]
+      });
+      console.log('Connected accounts for user:', JSON.stringify(connectedAccounts, null, 2));
+      
+      if (!connectedAccounts || !connectedAccounts.items || connectedAccounts.items.length === 0) {
+        console.error(`No connected accounts found for user ID: ${userId}`);
+        throw new Error(`No connected accounts found for user ID: ${userId}`);
+      }
+    } catch (error) {
+      console.error('Error checking connected accounts:', error);
+      // Continue anyway to see if tools.get works
+    }
+    
     const tools = await composio.tools.get(userId, {
       tools: ["GOOGLECALENDAR_EVENTS_LIST"],
     });
+    
+    console.log('Tools retrieved:', JSON.stringify(tools, null, 2));
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);

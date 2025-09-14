@@ -29,7 +29,10 @@ const ComposioAuth: React.FC = () => {
       console.log('Initializing Composio authentication for Google Calendar...');
       
       const authConfigId = import.meta.env.VITE_GOOGLE_CALENDAR_CONFIG_ID;
-      const userId = `user-${Date.now()}@calendar-app.com`; // Generate unique user ID
+      // Generate a unique user ID for each user
+      // In a real app, this would be tied to your user authentication system
+      const userId = `user-${Date.now()}-${Math.random().toString(36).substring(2, 9)}@calendar-app.com`;
+      console.log('Using dynamic user ID for authentication:', userId);
 
       const connectionRequest = await composio.connectedAccounts.initiate(
         userId,

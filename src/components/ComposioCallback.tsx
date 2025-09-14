@@ -27,12 +27,27 @@ const ComposioCallback: React.FC = () => {
         }
         
         const storedRequest = sessionStorage.getItem('composio_connection_request');
-        let userId = 'composio-user';
+        // Default fallback user ID in case storage fails
+        let userId = `user-fallback-${Date.now()}@calendar-app.com`;
         
         if (storedRequest) {
-          const parsed = JSON.parse(storedRequest);
-          userId = parsed.userId || userId;
+          try {
+            const parsed = JSON.parse(storedRequest);
+            // Use the stored userId from the authentication step
+            if (parsed.userId) {
+              userId = parsed.userId;
+              console.log('Retrieved user ID from session storage:', userId);
+            } else {
+              console.warn('No userId found in stored request, using fallback');
+            }
+          } catch (error) {
+            console.error('Error parsing stored connection request:', error);
+          }
+        } else {
+          console.warn('No connection request found in session storage, using fallback user ID');
         }
+        
+        console.log('ComposioCallback using user ID:', userId);
         
         if (import.meta.env.VITE_COMPOSIO_API_KEY) {
           const user = {
