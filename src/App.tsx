@@ -8,7 +8,6 @@ import ComposioCallback from "./components/ComposioCallback";
 import { useCalendarMCP } from "./hooks/useCalendarMCP";
 import type { CalendarEvent } from "./mcp/types";
 import Login from "./pages/Login";
-import ComposioRedirect from "./pages/ComposioRedirect";
 import type { User } from './types';
 
 // Main dashboard component that displays meetings

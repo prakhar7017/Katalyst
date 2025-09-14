@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
  */
 const ComposioCallback: React.FC = () => {
   const { login } = useAuth();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isProcessing, setIsProcessing] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
