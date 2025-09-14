@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
 import { Composio } from '@composio/core';
 
 /**
  * ComposioAuth component for handling authentication with Composio
  */
 const ComposioAuth: React.FC = () => {
-  const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -16,32 +14,12 @@ const ComposioAuth: React.FC = () => {
     
     try {
       if (!import.meta.env.VITE_COMPOSIO_API_KEY || !import.meta.env.VITE_GOOGLE_CALENDAR_CONFIG_ID) {
-        console.log('Using mock authentication - Composio not fully configured');
-        setTimeout(() => {
-          const mockComposioAuthResponse = {
-            success: true,
-            user: {
-              id: 'composio-user-123',
-              name: 'Composio User',
-              email: 'user@example.com',
-              picture: 'https://via.placeholder.com/150',
-            },
-            credentials: {
-              access_token: 'composio-gmail-access-token',
-              refresh_token: 'composio-gmail-refresh-token',
-              expires_at: Date.now() + 3600 * 1000, // 1 hour from now
-            }
-          };
-          
-          handleAuthSuccess(mockComposioAuthResponse);
-        }, 1500);
-        return;
+        throw new Error('Composio API key or Google Calendar config ID not found'); 
       }
 
       const composio = new Composio({
         apiKey: import.meta.env.VITE_COMPOSIO_API_KEY
       });
-      
       console.log('Initializing Composio authentication for Google Calendar...');
       
       const authConfigId = import.meta.env.VITE_GOOGLE_CALENDAR_CONFIG_ID;
@@ -53,10 +31,7 @@ const ComposioAuth: React.FC = () => {
         {
           callbackUrl: `${import.meta.env.VITE_COMPOSIO_REDIRECT_URI}/auth/callback`
         }
-      );
-      
-      console.log(`Visit this URL to authenticate Google Calendar: ${connectionRequest.redirectUrl}`);
-      
+      );      
       sessionStorage.setItem('composio_connection_request', JSON.stringify({
         connectionId: connectionRequest.id,
         userId: userId,
@@ -76,55 +51,7 @@ const ComposioAuth: React.FC = () => {
       setIsLoading(false);
     }
   };
-  
-  const handleAuthSuccess = (response: {
-    success: boolean;
-    user: {
-      id: string;
-      name: string;
-      email: string;
-      picture: string;
-    };
-    credentials: {
-      access_token: string;
-      refresh_token: string;
-      expires_at: number;
-    };
-  }) => {
-    try {
-      const user = {
-        id: response.user.id,
-        name: response.user.name,
-        email: response.user.email,
-        picture: response.user.picture,
-        accessToken: response.credentials.access_token,
-        refreshToken: response.credentials.refresh_token,
-        expiresAt: response.credentials.expires_at,
-        provider: 'composio-gmail',
-      };
-      
-      login(user);
-    } catch (err) {
-      console.error('Error processing auth response:', err);
-      setError('Failed to process authentication response.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  const handleMockLogin = () => {
-    const mockUser = {
-      id: 'mock-composio-user-123',
-      name: 'Mock Composio User',
-      email: 'mock@example.com',
-      picture: 'https://via.placeholder.com/150',
-      accessToken: 'mock-access-token-for-testing',
-      provider: 'composio-gmail',
-    };
-    
-    login(mockUser);
-  };
-  
+
   return (
     <div className="flex flex-col space-y-4">
       {error && (
@@ -151,14 +78,7 @@ const ComposioAuth: React.FC = () => {
             />
           </svg>
         )}
-        Sign in with Gmail (Composio)
-      </button>
-      
-      <button
-        onClick={handleMockLogin}
-        className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded flex items-center justify-center"
-      >
-        Sign in with Mock Composio Account (For Testing)
+        Sign in with (Composio)
       </button>
     </div>
   );

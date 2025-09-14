@@ -2,13 +2,10 @@
 
 export interface User {
   id: string;
-  name: string;
-  email: string;
+  connectionId: string;
+  appName: string;
   picture: string;
-  accessToken: string;
-  refreshToken?: string;
-  expiresAt?: number;
-  provider?: 'google' | 'composio-gmail';
+  expiresAt: number;
 }
 
 export interface AuthState {

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { createOrUpdateUser } from '../utils/db';
 
 /**
  * ComposioCallback component to handle the OAuth callback from Composio
@@ -30,27 +31,37 @@ const ComposioCallback: React.FC = () => {
         if (storedRequest) {
           const parsed = JSON.parse(storedRequest);
           userId = parsed.userId || userId;
-          console.log('Retrieved stored request:', parsed);
         }
         
         if (import.meta.env.VITE_COMPOSIO_API_KEY) {
-          console.log('Composio API key is configured');
-          
           const user = {
             id: userId,
-            name: `${appName || 'Composio'} User`,
-            email: userId,
-            picture: 'https://via.placeholder.com/150',
-            accessToken: connectedAccountId,
-            refreshToken: connectedAccountId,
+            picture: `https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=Jude`,
             expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days
-            provider: 'composio-gmail' as const,
-            connectionId: connectedAccountId,
+            connectionId: connectedAccountId, // Store connection ID for API calls
             appName: appName || 'googlecalendar'
           };
 
-          login(user);
-          window.location.href = '/';
+          try {
+            // Store user in database
+            console.log('Storing user in database...');
+            await createOrUpdateUser({
+              id: user.id,
+              connectionId: user.connectionId,
+              appName: user.appName,
+            });
+            console.log('User stored in database successfully');
+
+            // Login the user
+            login(user);
+
+            // Redirect to main app
+            window.location.href = '/';
+          } catch (dbError) {
+            console.error('Failed to store user in database:', dbError);
+            setError('Authentication successful, but failed to store user data. Please try again.');
+            setIsProcessing(false);
+          }
         } else {
           throw new Error('Composio API key not configured');
         }

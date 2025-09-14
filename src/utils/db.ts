@@ -1,30 +1,36 @@
 import { neon } from '@neondatabase/serverless';
 
-// Database connection string - in production, this would be an environment variable
-// For development, we'll use a placeholder that should be replaced with your actual Neon DB URL
-const NEON_DB_URL = process.env.NEON_DB_URL || 'postgresql://user:password@your-neon-db-url.neon.tech/neondb';
+const NEON_DB_URL = import.meta.env.VITE_NEON_DB_URL || 'postgresql://user:password@your-neon-db-url.neon.tech/neondb';
 
-// Create a SQL client
+console.log(`Database connection: ${NEON_DB_URL.includes('postgresql') ? 'Configured' : 'Using fallback'}`);
+
 const sql = neon(NEON_DB_URL);
 
-// Initialize database tables
 export async function initializeDatabase() {
   try {
-    // Create users table if it doesn't exist
     await sql`
       CREATE TABLE IF NOT EXISTS users (
         id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        email TEXT UNIQUE NOT NULL,
+        name TEXT,
+        email TEXT,
         picture TEXT,
         access_token TEXT,
         refresh_token TEXT,
+        connection_id TEXT,
+        app_name TEXT,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       )
     `;
+    
+    try {
+      await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS connection_id TEXT`;
+      await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS app_name TEXT`;
+      console.log('Added new columns to users table if needed');
+    } catch (columnError) {
+      console.warn('Error adding columns (may already exist):', columnError);
+    }
 
-    // Create meetings table if it doesn't exist
     await sql`
       CREATE TABLE IF NOT EXISTS meetings (
         id TEXT PRIMARY KEY,
@@ -49,25 +55,19 @@ export async function initializeDatabase() {
   }
 }
 
-// User operations
 export async function createOrUpdateUser(user: {
   id: string;
-  name: string;
-  email: string;
-  picture?: string;
-  accessToken: string;
-  refreshToken?: string;
-}) {
+  connectionId?: string;
+  appName?: string  
+}) {      
   try {
     const result = await sql`
-      INSERT INTO users (id, name, email, picture, access_token, refresh_token)
-      VALUES (${user.id}, ${user.name}, ${user.email}, ${user.picture}, ${user.accessToken}, ${user.refreshToken})
+      INSERT INTO users (id, connection_id, app_name)
+      VALUES (${user.id}, ${user.connectionId}, ${user.appName})
       ON CONFLICT (id) DO UPDATE SET
-        name = ${user.name},
-        email = ${user.email},
-        picture = ${user.picture},
-        access_token = ${user.accessToken},
-        refresh_token = ${user.refreshToken},
+        id = ${user.id},
+        connection_id = ${user.connectionId},
+        app_name = ${user.appName},
         updated_at = CURRENT_TIMESTAMP
       RETURNING *
     `;
@@ -78,10 +78,10 @@ export async function createOrUpdateUser(user: {
   }
 }
 
-export async function getUserById(id: string) {
+export async function getUserById(connection_id: string) {
   try {
     const result = await sql`
-      SELECT * FROM users WHERE id = ${id}
+      SELECT * FROM users WHERE connection_id = ${connection_id}
     `;
     return result[0] || null;
   } catch (error) {
@@ -99,7 +99,7 @@ export async function saveMeeting(meeting: {
   endTime: Date;
   description?: string;
   location?: string;
-  attendees?: any[];
+  attendees?: Array<{email: string; name?: string; response?: string}>;
   summary?: string;
 }) {
   try {

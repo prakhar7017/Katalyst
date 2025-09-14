@@ -8,7 +8,6 @@ import ComposioCallback from "./components/ComposioCallback";
 import { useCalendarMCP } from "./hooks/useCalendarMCP";
 import type { CalendarEvent } from "./mcp/types";
 import Login from "./pages/Login";
-import type { User } from './types';
 
 // Main dashboard component that displays meetings
 function Dashboard() {
@@ -40,16 +39,9 @@ function Dashboard() {
                 {user.picture && (
                   <img
                     src={user.picture}
-                    alt={user.name}
                     className="h-8 w-8 rounded-full mr-2"
                   />
                 )}
-                <span className="text-sm font-medium text-gray-700 hidden md:inline">
-                  {user.name}
-                  {(user as User).provider === 'composio-gmail' && (
-                    <span className="ml-1 text-xs bg-blue-100 text-blue-800 px-1 rounded">Composio</span>
-                  )}
-                </span>
               </div>
               <button
                 onClick={logout}
@@ -133,6 +125,7 @@ function Dashboard() {
               onMeetingClick={(meeting) => handleMeetingClick(meeting, true)}
             />
           </div>
+          
           
           {selectedMeeting && (
             <MeetingDetails

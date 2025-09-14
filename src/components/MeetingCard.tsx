@@ -9,6 +9,19 @@ interface MeetingCardProps {
 
 const MeetingCard: React.FC<MeetingCardProps> = ({ meeting, isPast = false, onClick }) => {
 
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'confirmed':
+        return 'bg-green-100 text-green-800';
+      case 'tentative':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
   const formatDateTime = (dateTimeStr: string) => {
     const date = new Date(dateTimeStr);
     return new Intl.DateTimeFormat('en-US', {
@@ -71,17 +84,29 @@ const MeetingCard: React.FC<MeetingCardProps> = ({ meeting, isPast = false, onCl
       )}
       
       <div className="flex justify-between items-center mt-2">
-        <div className="flex items-center">
+        <div className="flex flex-col">
           <span className="text-xs text-gray-500">
             {attendeeCount > 0 ? `${attendeeCount} attendee${attendeeCount !== 1 ? 's' : ''}` : 'No attendees'}
           </span>
+          {meeting.organizer && (
+            <span className="text-xs text-gray-600 mt-1">
+              Organizer: {meeting.organizer.displayName || meeting.organizer.email}
+            </span>
+          )}
         </div>
         
-        {isPast && meeting.description && (
-          <span className="text-xs text-blue-600 hover:text-blue-800">
-            View summary
-          </span>
-        )}
+        <div className="flex flex-col items-end">
+          {meeting.status && (
+            <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(meeting.status)}`}>
+              {meeting.status.charAt(0).toUpperCase() + meeting.status.slice(1)}
+            </span>
+          )}
+          {isPast && meeting.description && (
+            <span className="text-xs text-blue-600 hover:text-blue-800 mt-1">
+              View summary
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -1,9 +1,17 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import type { ReactNode } from 'react';
-import type { User, AuthState } from '../types';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import type { ReactNode } from "react";
+import type { User, AuthState } from "../types";
+
+export interface response {
+  id: string;
+  connectionId: string;
+  appName: string;
+  picture: string;
+  expiresAt: number;
+}
 
 interface AuthContextType extends AuthState {
-  login: (response: any) => void;
+  login: (response: response) => void;
   logout: () => void;
 }
 
@@ -22,7 +30,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   });
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
+    const storedUser = localStorage.getItem("user");
     if (storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser);
@@ -33,44 +41,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           error: null,
         });
       } catch (error) {
-        console.error('Failed to parse stored user:', error);
-        localStorage.removeItem('user');
-        setAuthState(prev => ({ ...prev, isLoading: false }));
+        console.error("Failed to parse stored user:", error);
+        localStorage.removeItem("user");
+        setAuthState((prev) => ({ ...prev, isLoading: false }));
       }
     } else {
-      setAuthState(prev => ({ ...prev, isLoading: false }));
+      setAuthState((prev) => ({ ...prev, isLoading: false }));
     }
   }, []);
 
-  const login = (response: any) => {
+  const login = (response: response) => {
     try {
-      let user: User;
-      
-      if (response.id && response.accessToken) {
-        user = {
-          id: response.id,
-          name: response.name || '',
-          email: response.email || '',
-          picture: response.picture || '',
-          accessToken: response.accessToken,
-          refreshToken: response.refreshToken,
-          expiresAt: response.expiresAt,
-          provider: response.provider || 'google',
-        };
-      } else {
-        const profile = response.profileObj || {};
-        user = {
-          id: profile.googleId || response.sub || '',
-          name: profile.name || '',
-          email: profile.email || '',
-          picture: profile.imageUrl || '',
-          accessToken: response.access_token || response.accessToken || '',
-          provider: 'google',
-        };
+      if (
+        !response.id ||
+        !response.connectionId ||
+        !response.appName ||
+        !response.picture ||
+        !response.expiresAt
+      ) {
+        throw new Error("Invalid login response");
       }
 
-      localStorage.setItem('user', JSON.stringify(user));
+      const user: User = {
+        id: response.id,
+        connectionId: response.connectionId,
+        appName: response.appName,
+        picture: response.picture,
+        expiresAt: response.expiresAt,
+      };
 
+      localStorage.setItem("user", JSON.stringify(user));
       setAuthState({
         isAuthenticated: true,
         user,
@@ -78,18 +78,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         error: null,
       });
     } catch (error) {
-      console.error('Login error:', error);
+      console.error("Login error:", error);
       setAuthState({
         isAuthenticated: false,
         user: null,
         isLoading: false,
-        error: 'Failed to login. Please try again.',
+        error: "Failed to login. Please try again.",
       });
     }
   };
 
   const logout = () => {
-    localStorage.removeItem('user');
+    localStorage.removeItem("user");
     setAuthState({
       isAuthenticated: false,
       user: null,
@@ -114,7 +114,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
