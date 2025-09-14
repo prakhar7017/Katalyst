@@ -7,9 +7,10 @@ import { createOrUpdateUser } from '../utils/db';
  */
 const ComposioCallback: React.FC = () => {
   const { login } = useAuth();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isProcessing, setIsProcessing] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  console.log('ComposioCallback component mounted',isProcessing);
 
   useEffect(() => {
     const handleCallback = async () => {
