@@ -25,6 +25,10 @@ export async function fetchCalendarEventsWithAI(
         ? `${window.location.protocol}//${window.location.host}/api/composio` 
         : undefined,
     });
+    
+    console.log('Composio baseURL in fetchCalendarEventsWithAI:', window.location.hostname.includes('vercel.app') 
+      ? `${window.location.protocol}//${window.location.host}/api/composio` 
+      : 'default');
 
     console.log(
       `Setting up Composio with OpenAI for connection ID: ${connectionId}`

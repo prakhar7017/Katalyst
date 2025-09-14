@@ -23,6 +23,9 @@ const ComposioAuth: React.FC = () => {
           ? `${window.location.protocol}//${window.location.host}/api/composio` 
           : undefined
       });
+      console.log('Composio baseURL:', window.location.hostname.includes('vercel.app') 
+        ? `${window.location.protocol}//${window.location.host}/api/composio` 
+        : 'default');
       console.log('Initializing Composio authentication for Google Calendar...');
       
       const authConfigId = import.meta.env.VITE_GOOGLE_CALENDAR_CONFIG_ID;
