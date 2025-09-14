@@ -44,20 +44,33 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = (response: any) => {
     try {
-      // Extract user information from Google response
-      const profile = response.profileObj || {};
-      const user: User = {
-        id: profile.googleId || response.sub || '',
-        name: profile.name || '',
-        email: profile.email || '',
-        picture: profile.imageUrl || '',
-        accessToken: response.access_token || response.accessToken || '',
-      };
+      let user: User;
+      
+      if (response.id && response.accessToken) {
+        user = {
+          id: response.id,
+          name: response.name || '',
+          email: response.email || '',
+          picture: response.picture || '',
+          accessToken: response.accessToken,
+          refreshToken: response.refreshToken,
+          expiresAt: response.expiresAt,
+          provider: response.provider || 'google',
+        };
+      } else {
+        const profile = response.profileObj || {};
+        user = {
+          id: profile.googleId || response.sub || '',
+          name: profile.name || '',
+          email: profile.email || '',
+          picture: profile.imageUrl || '',
+          accessToken: response.access_token || response.accessToken || '',
+          provider: 'google',
+        };
+      }
 
-      // Store user in localStorage
       localStorage.setItem('user', JSON.stringify(user));
 
-      // Update auth state
       setAuthState({
         isAuthenticated: true,
         user,
@@ -76,10 +89,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const logout = () => {
-    // Clear user from localStorage
     localStorage.removeItem('user');
-
-    // Update auth state
     setAuthState({
       isAuthenticated: false,
       user: null,

@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { GoogleCalendarMCP } from '../mcp/GoogleCalendarMCP';
+import { ComposioCalendarMCP } from '../mcp/ComposioCalendarMCP';
 import type { CalendarEvent } from '../mcp/types';
 
 interface UseCalendarMCPResult {
@@ -19,14 +19,14 @@ export function useCalendarMCP(maxResults = 5): UseCalendarMCPResult {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const getMCPClient = () => {
+  const getMCPClient = useCallback(() => {
     if (!isAuthenticated || !user?.accessToken) {
       throw new Error('User not authenticated');
     }
-    return new GoogleCalendarMCP(user.accessToken);
-  };
+    return new ComposioCalendarMCP(user.accessToken);
+  }, [isAuthenticated, user]);
 
-  const fetchEvents = async () => {
+  const fetchEvents = useCallback(async () => {
     if (!isAuthenticated || !user?.accessToken) {
       return;
     }
@@ -44,13 +44,13 @@ export function useCalendarMCP(maxResults = 5): UseCalendarMCPResult {
       
       setUpcomingEvents(upcoming);
       setPastEvents(past);
-    } catch (err) {
-      console.error('Error fetching calendar events:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch calendar events');
+    } catch (error) {
+      console.error('Error fetching calendar events:', error);
+      setError('Failed to fetch calendar events. Please try again.');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [isAuthenticated, user, maxResults, getMCPClient]);
 
     const getEventDetails = async (eventId: string): Promise<CalendarEvent | null> => {
     if (!isAuthenticated || !user?.accessToken) {
@@ -74,7 +74,7 @@ export function useCalendarMCP(maxResults = 5): UseCalendarMCPResult {
       setUpcomingEvents([]);
       setPastEvents([]);
     }
-  }, [isAuthenticated, user?.accessToken]);
+  }, [isAuthenticated, user, fetchEvents]);
 
   return {
     upcomingEvents,
